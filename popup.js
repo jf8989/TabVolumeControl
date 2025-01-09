@@ -1,43 +1,49 @@
-// Load the saved volume value when the popup is opened
 document.addEventListener('DOMContentLoaded', () => {
-    // Get the saved volume from storage
-    chrome.storage.local.get('currentVolume', (data) => {
-        // Use the saved volume, or default to 1 if no value is set
-        const volume = data.currentVolume || 1;
-        const volumeSlider = document.getElementById('volume');
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const url = new URL(tabs[0].url);
+        const domain = url.hostname; // Extract the domain name
 
-        // Set the slider's value to the saved volume
-        volumeSlider.value = volume;
+        chrome.storage.local.get([domain], (data) => {
+            const volume = data[domain] || 20; // Default to 20 if no value is stored
+            const volumeSlider = document.getElementById('volume');
 
-        // Apply the saved volume to the current tab
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            // Set the slider's value to the stored volume
+            volumeSlider.value = volume;
+
+            // Apply the stored volume to the current tab, normalized
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
                 func: setVolumeOnPage,
-                args: [volume],
+                args: [normalizeVolume(volume)],
             });
         });
     });
 });
 
-// Handle volume slider input
 document.getElementById('volume').addEventListener('input', (event) => {
     const volume = event.target.value;
 
-    // Save the volume value to local storage
-    chrome.storage.local.set({ currentVolume: volume });
-
-    // Apply the new volume to the current tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const url = new URL(tabs[0].url);
+        const domain = url.hostname; // Extract the domain name
+
+        // Save the volume for this domain
+        chrome.storage.local.set({ [domain]: volume });
+
+        // Apply the new volume to the current tab, normalized
         chrome.scripting.executeScript({
             target: { tabId: tabs[0].id },
             func: setVolumeOnPage,
-            args: [volume],
+            args: [normalizeVolume(volume)],
         });
     });
 });
 
-// Function to set the volume of all audio/video elements on the page
+// Normalize slider value (0-20) to media-compatible range (0-1)
+function normalizeVolume(value) {
+    return value / 20; // Convert 0-20 to 0-1
+}
+
 function setVolumeOnPage(volume) {
     document.querySelectorAll('audio, video').forEach((media) => {
         media.volume = volume;
