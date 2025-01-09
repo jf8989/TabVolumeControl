@@ -9,6 +9,7 @@ The **TabVolumeControl** browser extension allows users to control the audio vol
 - **Volume Adjustment**: Use a simple slider to control the volume of the current tab.
 - **Volume Memory**: Remembers the last volume setting for consistent use across sessions.
 - **Instagram Compatibility**: Automatically retains and applies the set volume across Instagram stories, ensuring a consistent audio experience while navigating through dynamic content.
+- **On/Off Switch**: Includes a simple toggle switch to activate or deactivate the extension for specific websites automatically on load.
 - **Lightweight and Efficient**: Focused solely on tab audio control without unnecessary overhead.
 - **Cross-Platform Compatibility**: Works on Chromium-based browsers (e.g., Chrome, Edge).
 
@@ -29,7 +30,8 @@ The **TabVolumeControl** browser extension allows users to control the audio vol
 ### Usage
 1. Click on the **TabVolumeControl** icon in your browser toolbar.
 2. Use the volume slider to adjust the audio level for the current tab.
-3. The extension will save your volume settings for future use, including dynamic content such as Instagram stories.
+3. Toggle the on/off switch to activate or deactivate the extension for specific websites automatically on load.
+4. The extension will save your volume settings for future use, including dynamic content such as Instagram stories.
 
 ---
 

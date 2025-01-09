@@ -5,19 +5,45 @@ function applyVolume(volume) {
     });
 }
 
+function observeDynamicMedia() {
+    const domain = window.location.hostname;
+
+    chrome.storage.local.get([domain, `active_${domain}`], (data) => {
+        const isActive = data[`active_${domain}`] ?? true; // Default to true
+        const volume = data[domain] || 20; // Default to 20
+
+        if (!isActive) {
+            console.log(`Extension disabled for ${domain}. Skipping volume updates.`);
+            return; // Skip updates if the extension is disabled for this domain
+        }
+
+        // Observe dynamic changes in the DOM
+        const observer = new MutationObserver(() => {
+            chrome.storage.local.get(domain, (volumeData) => {
+                const updatedVolume = volumeData[domain] || 20; // Default to 20
+                applyVolume(updatedVolume);
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Apply volume to existing media elements
+        applyVolume(volume);
+    });
+}
+
 function initObserver() {
     let observer;
+    const domain = window.location.hostname;
 
     try {
         observer = new MutationObserver(() => {
-            // Check if the extension context is still valid
             if (chrome && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.get(window.location.hostname, (data) => {
-                    if (chrome.runtime.lastError) {
-                        console.warn("Extension context invalidated during volume update.");
-                        return;
-                    }
-                    const volume = data[window.location.hostname] || 20; // Default to 20
+                chrome.storage.local.get([domain, `active_${domain}`], (data) => {
+                    const isActive = data[`active_${domain}`] ?? true; // Default to true
+                    if (!isActive) return; // Skip updates if disabled for this domain
+
+                    const volume = data[domain] || 20; // Default to 20
                     applyVolume(volume);
                 });
             } else {
@@ -26,20 +52,11 @@ function initObserver() {
             }
         });
 
-        // Start observing for changes
+        // Start observing dynamic DOM changes
         observer.observe(document.body, { childList: true, subtree: true });
 
-        // Apply volume to existing media elements
-        if (chrome && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(window.location.hostname, (data) => {
-                if (chrome.runtime.lastError) {
-                    //console.warn("Extension context invalidated during initial volume application.");
-                    return;
-                }
-                const volume = data[window.location.hostname] || 20; // Default to 20
-                applyVolume(volume);
-            });
-        }
+        // Apply volume to existing media elements on initial load
+        observeDynamicMedia();
     } catch (error) {
         console.error("Error initializing observer:", error);
         if (observer) observer.disconnect(); // Ensure observer is disconnected on failure

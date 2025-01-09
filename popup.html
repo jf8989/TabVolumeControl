@@ -1,13 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>Tab Volume Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            text-align: center;
+            width: 250px;
+            /* Set a minimum width for the popup */
+        }
+
+        #toggle-container {
+            margin-top: 15px;
+        }
+
+        #volume {
+            width: 100%;
+            /* Make the slider take full available width */
+        }
+    </style>
 </head>
 
 <body>
     <label for="volume">Volume:</label>
     <input type="range" id="volume" min="0" max="20" step="0.1" value="1">
+    <div id="toggle-container">
+        <label for="extension-toggle">Enable for this website:</label>
+        <input type="checkbox" id="extension-toggle" />
+    </div>
     <script src="popup.js"></script>
 </body>
 
