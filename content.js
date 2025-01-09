@@ -1,5 +1,6 @@
+// content.js
 function applyVolume(volume) {
-    const normalizedVolume = volume / 20; // Normalize to 0-1 range
+    const normalizedVolume = volume / 100; // Normalize to 0-1 range
     document.querySelectorAll('audio, video').forEach((media) => {
         media.volume = normalizedVolume;
     });
@@ -10,17 +11,17 @@ function observeDynamicMedia() {
 
     chrome.storage.local.get([domain, `active_${domain}`], (data) => {
         const isActive = data[`active_${domain}`] ?? true; // Default to true
-        const volume = data[domain] || 20; // Default to 20
+        const volume = data[domain] || 100; // Default to 100%
 
         if (!isActive) {
             console.log(`Extension disabled for ${domain}. Skipping volume updates.`);
-            return; // Skip updates if the extension is disabled for this domain
+            return;
         }
 
         // Observe dynamic changes in the DOM
         const observer = new MutationObserver(() => {
             chrome.storage.local.get(domain, (volumeData) => {
-                const updatedVolume = volumeData[domain] || 20; // Default to 20
+                const updatedVolume = volumeData[domain] || 100;
                 applyVolume(updatedVolume);
             });
         });
@@ -40,15 +41,15 @@ function initObserver() {
         observer = new MutationObserver(() => {
             if (chrome && chrome.storage && chrome.storage.local) {
                 chrome.storage.local.get([domain, `active_${domain}`], (data) => {
-                    const isActive = data[`active_${domain}`] ?? true; // Default to true
-                    if (!isActive) return; // Skip updates if disabled for this domain
+                    const isActive = data[`active_${domain}`] ?? true;
+                    if (!isActive) return;
 
-                    const volume = data[domain] || 20; // Default to 20
+                    const volume = data[domain] || 100;
                     applyVolume(volume);
                 });
             } else {
                 console.warn("Extension context invalidated. Disconnecting observer.");
-                if (observer) observer.disconnect(); // Disconnect the observer
+                if (observer) observer.disconnect();
             }
         });
 
@@ -59,7 +60,7 @@ function initObserver() {
         observeDynamicMedia();
     } catch (error) {
         console.error("Error initializing observer:", error);
-        if (observer) observer.disconnect(); // Ensure observer is disconnected on failure
+        if (observer) observer.disconnect();
     }
 }
 
